@@ -1,38 +1,57 @@
 import React, { useState } from 'react';
-import { Edit2, Trash2, MoreVertical, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { formatCurrency, formatDateLao, getAccountName } from '../utils/format';
-import { useApp } from '../context/AppContext';
+import { Pencil, Trash2 } from 'lucide-react';
 import TransactionModal from './TransactionModal';
 
-const TransactionList = ({ transactions, showType = true }) => {
-  const { deleteTransaction } = useApp();
-  const [editingTransaction, setEditingTransaction] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
+const TransactionList = ({ transactions = [], onUpdate }) => {
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState('view'); // 'view' | 'edit' | 'delete'
 
-  const handleDelete = async (id) => {
-    if (window.confirm('ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບທຸລະກຳນີ້?')) {
-      setDeletingId(id);
-      try {
-        await deleteTransaction(id);
-      } finally {
-        setDeletingId(null);
-      }
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('lo-LA').format(amount) + ' ₭';
+  };
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('lo-LA', {
+      day: 'numeric',
+      month: 'short'
+    });
+  };
+
+  const handleEdit = (e, transaction) => {
+    e.stopPropagation();
+    setSelectedTransaction(transaction);
+    setModalMode('edit');
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (e, transaction) => {
+    e.stopPropagation();
+    setSelectedTransaction(transaction);
+    setModalMode('delete');
+    setIsModalOpen(true);
+  };
+
+  const handleItemClick = (transaction) => {
+    setSelectedTransaction(transaction);
+    setModalMode('view');
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleSuccess = () => {
+    if (onUpdate) {
+      onUpdate();
+    } else {
+      window.location.reload();
     }
   };
 
-  if (!transactions || transactions.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">📝</span>
-        </div>
-        <p className="text-slate-500">ຍັງບໍ່ມີທຸລະກຳ</p>
-        <p className="text-sm text-slate-400 mt-1">ເລີ່ມບັນທຶກລາຍຮັບ-ລາຍຈ່າຍຂອງທ່ານ</p>
-      </div>
-    );
-  }
-
-  // Group by date
+  // ຈັດກຸ່ມ transactions ຕາມວັນທີ
   const groupedTransactions = transactions.reduce((groups, transaction) => {
     const date = new Date(transaction.date).toDateString();
     if (!groups[date]) {
@@ -42,96 +61,95 @@ const TransactionList = ({ transactions, showType = true }) => {
     return groups;
   }, {});
 
+  if (transactions.length === 0) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state-icon">
+          <span className="text-2xl">📭</span>
+        </div>
+        <h3 className="empty-state-title">ບໍ່ມີທຸລະກຳ</h3>
+        <p className="empty-state-text">ຍັງບໍ່ມີທຸລະກຳໃນຊ່ວງເວລານີ້</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {Object.entries(groupedTransactions).map(([date, items]) => (
           <div key={date}>
-            {/* Date header */}
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-sm font-medium text-slate-500">
-                {formatDateLao(new Date(date))}
-              </span>
-              <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-xs text-slate-400">
-                {items.length} ລາຍການ
-              </span>
+            {/* Date Header */}
+            <div className="flex items-center justify-between mb-2 px-1">
+              <h4 className="text-sm font-medium text-slate-500">
+                {new Date(date).toLocaleDateString('lo-LA', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </h4>
+              <span className="text-xs text-slate-400">{items.length} ລາຍການ</span>
             </div>
 
-            {/* Transactions */}
+            {/* Transaction Items */}
             <div className="space-y-2">
               {items.map((transaction) => (
                 <div
                   key={transaction._id}
-                  className="card p-4 hover:shadow-lg transition-all duration-200 group"
+                  onClick={() => handleItemClick(transaction)}
+                  className="group transaction-item cursor-pointer hover:shadow-md active:scale-[0.99] transition-all"
                 >
-                  <div className="flex items-center gap-4">
-                    {/* Icon */}
-                    <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                      style={{ backgroundColor: `${transaction.category?.color}20` }}
-                    >
-                      {transaction.category?.icon || '📝'}
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-slate-800 truncate">
-                          {transaction.category?.name || 'ບໍ່ລະບຸໝວດໝູ່'}
-                        </h4>
-                        {showType && (
-                          transaction.type === 'income' ? (
-                            <ArrowUpCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                          ) : (
-                            <ArrowDownCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                          )
-                        )}
-                      </div>
-                      <p className="text-sm text-slate-500 truncate">
-                        {transaction.description || getAccountName(transaction.account)}
-                      </p>
-                    </div>
-
-                    {/* Amount */}
-                    <div className="text-right">
-                      <p className={`font-semibold currency ${
-                        transaction.type === 'income' ? 'text-emerald-600' : 'text-red-600'
-                      }`}>
-                        {transaction.type === 'income' ? '+' : '-'}
-                        {formatCurrency(transaction.amount, transaction.currency)}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        {getAccountName(transaction.account)}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => setEditingTransaction(transaction)}
-                        className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(transaction._id)}
-                        disabled={deletingId === transaction._id}
-                        className="p-2 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                  {/* Icon */}
+                  <div className={`transaction-icon ${
+                    transaction.type === 'income' ? 'bg-emerald-100' : 'bg-red-100'
+                  }`}>
+                    <span className="text-xl">
+                      {transaction.category?.icon || (transaction.type === 'income' ? '💰' : '💸')}
+                    </span>
                   </div>
 
-                  {/* Note */}
-                  {transaction.note && (
-                    <div className="mt-3 pt-3 border-t border-slate-100">
-                      <p className="text-sm text-slate-500 italic">
-                        💬 {transaction.note}
-                      </p>
-                    </div>
-                  )}
+                  {/* Info */}
+                  <div className="transaction-info">
+                    <p className="transaction-name">
+                      {transaction.description || transaction.category?.name || 'ບໍ່ລະບຸ'}
+                    </p>
+                    <p className="transaction-category">
+                      {transaction.category?.name || 'ບໍ່ມີໝວດໝູ່'}
+                    </p>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="text-right mr-2">
+                    <p className={`transaction-amount ${transaction.type}`}>
+                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5 md:hidden">
+                      {formatDate(transaction.date)}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Edit Button */}
+                    <button
+                      onClick={(e) => handleEdit(e, transaction)}
+                      className="w-9 h-9 rounded-xl bg-emerald-100 hover:bg-emerald-200 
+                               flex items-center justify-center transition-colors"
+                      title="ແກ້ໄຂ"
+                    >
+                      <Pencil className="w-4 h-4 text-emerald-600" />
+                    </button>
+
+                    {/* Delete Button */}
+                    <button
+                      onClick={(e) => handleDelete(e, transaction)}
+                      className="w-9 h-9 rounded-xl bg-red-100 hover:bg-red-200 
+                               flex items-center justify-center transition-colors"
+                      title="ລົບ"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -139,14 +157,14 @@ const TransactionList = ({ transactions, showType = true }) => {
         ))}
       </div>
 
-      {/* Edit Modal */}
-      {editingTransaction && (
-        <TransactionModal
-          type={editingTransaction.type}
-          transaction={editingTransaction}
-          onClose={() => setEditingTransaction(null)}
-        />
-      )}
+      {/* Transaction Modal */}
+      <TransactionModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        transaction={selectedTransaction}
+        onSuccess={handleSuccess}
+        initialMode={modalMode}
+      />
     </>
   );
 };
