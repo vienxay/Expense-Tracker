@@ -5,7 +5,7 @@ import TransactionModal from './TransactionModal';
 const TransactionList = ({ transactions = [], onUpdate }) => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('view'); // 'view' | 'edit' | 'delete'
+  const [modalMode, setModalMode] = useState('view');
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('lo-LA').format(amount) + ' ₭';
@@ -97,43 +97,49 @@ const TransactionList = ({ transactions = [], onUpdate }) => {
                 <div
                   key={transaction._id}
                   onClick={() => handleItemClick(transaction)}
-                  className="group transaction-item cursor-pointer hover:shadow-md active:scale-[0.99] transition-all"
+                  className="flex items-center gap-3 p-3 md:p-4 bg-white rounded-xl md:rounded-2xl 
+                           shadow-sm hover:shadow-md active:scale-[0.99] transition-all cursor-pointer
+                           group"
                 >
                   {/* Icon */}
-                  <div className={`transaction-icon ${
+                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     transaction.type === 'income' ? 'bg-emerald-100' : 'bg-red-100'
                   }`}>
-                    <span className="text-xl">
+                    <span className="text-lg md:text-xl">
                       {transaction.category?.icon || (transaction.type === 'income' ? '💰' : '💸')}
                     </span>
                   </div>
 
                   {/* Info */}
-                  <div className="transaction-info">
-                    <p className="transaction-name">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm md:text-base font-semibold text-slate-800 truncate">
                       {transaction.description || transaction.category?.name || 'ບໍ່ລະບຸ'}
                     </p>
-                    <p className="transaction-category">
+                    <p className="text-xs md:text-sm text-slate-500 truncate">
                       {transaction.category?.name || 'ບໍ່ມີໝວດໝູ່'}
                     </p>
                   </div>
 
                   {/* Amount */}
-                  <div className="text-right mr-2">
-                    <p className={`transaction-amount ${transaction.type}`}>
+                  <div className="text-right flex-shrink-0">
+                    <p className={`text-sm md:text-base font-bold ${
+                      transaction.type === 'income' ? 'text-emerald-600' : 'text-red-500'
+                    }`}>
                       {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                     </p>
-                    <p className="text-xs text-slate-400 mt-0.5 md:hidden">
+                    <p className="text-xs text-slate-400 mt-0.5">
                       {formatDate(transaction.date)}
                     </p>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Action Buttons - ສະແດງຕະຫຼອດເວລາ */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     {/* Edit Button */}
                     <button
                       onClick={(e) => handleEdit(e, transaction)}
-                      className="w-9 h-9 rounded-xl bg-emerald-100 hover:bg-emerald-200 
+                      className="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl 
+                               bg-emerald-50 md:bg-emerald-100 
+                               hover:bg-emerald-200 active:bg-emerald-300
                                flex items-center justify-center transition-colors"
                       title="ແກ້ໄຂ"
                     >
@@ -143,7 +149,9 @@ const TransactionList = ({ transactions = [], onUpdate }) => {
                     {/* Delete Button */}
                     <button
                       onClick={(e) => handleDelete(e, transaction)}
-                      className="w-9 h-9 rounded-xl bg-red-100 hover:bg-red-200 
+                      className="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl 
+                               bg-red-50 md:bg-red-100 
+                               hover:bg-red-200 active:bg-red-300
                                flex items-center justify-center transition-colors"
                       title="ລົບ"
                     >
