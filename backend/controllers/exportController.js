@@ -1,6 +1,8 @@
 const Transaction = require('../models/Transaction');
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
 
 // @desc    Export transactions to Excel
 // @route   GET /api/export/excel
@@ -139,9 +141,35 @@ const exportPDF = async (req, res) => {
 
     const doc = new PDFDocument({ margin: 50, size: 'A4' });
 
-    // Register TTF font (ຕ້ອງມີ font TTF ໃນ project folder)
-    doc.registerFont('NotoLao', './fonts/NotoSansLao.ttf');
-    doc.font('NotoLao'); // ໃຊ້ font ສຳລັບທຸກຂໍ້ຄວາມລາວ
+    // ກວດຫາ font file - ລອງຫຼາຍທີ່ຢູ່
+    const fontPaths = [
+      './fonts/NotoSansLao-VariableFont_wdth,wght.ttf',
+      './fonts/NotoSansLao-VariableFont_wdth,wght.ttf',
+      path.join(__dirname, '../fonts/NotoSansLao-VariableFont_wdth,wght.ttf'),
+      path.join(__dirname, '../fonts/NotoSansLao-VariableFont_wdth,wght.ttf'),
+      '/usr/share/fonts/truetype/noto/NotoSansLao-VariableFont_wdth,wght.ttf'
+    ];
+
+    let fontLoaded = false;
+    for (const fontPath of fontPaths) {
+      try {
+        if (fs.existsSync(fontPath)) {
+          doc.registerFont('NotoLao', fontPath);
+          doc.font('NotoLao');
+          fontLoaded = true;
+          console.log('Font loaded from:', fontPath);
+          break;
+        }
+      } catch (err) {
+        console.log('Font not found at:', fontPath);
+      }
+    }
+
+    // ຖ້າບໍ່ມີ font ລາວ ໃຊ້ Helvetica (ຈະບໍ່ສະແດງພາສາລາວໄດ້ຖືກຕ້ອງ)
+    if (!fontLoaded) {
+      console.warn('Lao font not found, using Helvetica. Lao text may not display correctly.');
+      doc.font('Helvetica');
+    }
 
     // Response headers
     res.setHeader('Content-Type', 'application/pdf');
@@ -153,31 +181,33 @@ const exportPDF = async (req, res) => {
     doc.pipe(res);
 
     // Title
-    doc.fontSize(20).text('ລາຍງານການເງິນ', { align: 'center' });
+    doc.fontSize(20).text(fontLoaded ? 'ລາຍງານການເງິນ' : 'Financial Report', { align: 'center' });
     doc.fontSize(12).text('Expense Report', { align: 'center' });
     doc.moveDown();
 
     // Date range
     if (startDate && endDate) {
-      doc.fontSize(10).text(`ວັນທີ: ${startDate} - ${endDate}`, { align: 'center' });
+      doc.fontSize(10).text(`${fontLoaded ? 'ວັນທີ' : 'Date'}: ${startDate} - ${endDate}`, { align: 'center' });
     }
-    doc.text(`ສ້າງເມື່ອ: ${new Date().toLocaleDateString('lo-LA')}`, { align: 'center' });
+    doc.text(`${fontLoaded ? 'ສ້າງເມື່ອ' : 'Created'}: ${new Date().toLocaleDateString('en-US')}`, { align: 'center' });
     doc.moveDown(2);
 
     // Summary Box
-    doc.rect(50, doc.y, 495, 80).stroke();
-    const summaryY = doc.y + 10;
+    const boxY = doc.y;
+    doc.rect(50, boxY, 495, 80).stroke();
     
     doc.fontSize(12);
-    doc.text(`ລາຍຮັບລວມ: ${formatNumber(totalIncome)} LAK`, 70, summaryY);
-    doc.text(`ລາຍຈ່າຍລວມ: ${formatNumber(totalExpense)} LAK`, 70, summaryY + 20);
-    doc.text(`ຍອດຄົງເຫຼືອ: ${formatNumber(totalIncome - totalExpense)} LAK`, 70, summaryY + 40);
+    doc.text(`${fontLoaded ? 'ລາຍຮັບລວມ' : 'Total Income'}: ${formatNumber(totalIncome)} LAK`, 70, boxY + 15);
+    doc.text(`${fontLoaded ? 'ລາຍຈ່າຍລວມ' : 'Total Expense'}: ${formatNumber(totalExpense)} LAK`, 70, boxY + 35);
+    doc.text(`${fontLoaded ? 'ຍອດຄົງເຫຼືອ' : 'Balance'}: ${formatNumber(totalIncome - totalExpense)} LAK`, 70, boxY + 55);
 
-    doc.moveDown(5);
+    doc.y = boxY + 100;
 
     // Table Header
     const tableTop = doc.y;
-    const tableHeaders = ['ວັນທີ', 'ປະເພດ', 'ໝວດໝູ່', 'ຈຳນວນ', 'ບັນຊີ'];
+    const tableHeaders = fontLoaded 
+      ? ['ວັນທີ', 'ປະເພດ', 'ໝວດໝູ່', 'ຈຳນວນ', 'ບັນຊີ']
+      : ['Date', 'Type', 'Category', 'Amount', 'Account'];
     const colWidths = [80, 70, 120, 100, 80];
     let xPos = 50;
 
@@ -206,17 +236,23 @@ const exportPDF = async (req, res) => {
 
       xPos = 50;
       const rowData = [
-        new Date(t.date).toLocaleDateString('lo-LA'),
-        t.type === 'income' ? 'ລາຍຮັບ' : 'ລາຍຈ່າຍ',
-        t.category?.name || 'ບໍ່ລະບຸ',
+        new Date(t.date).toLocaleDateString('en-US'),
+        fontLoaded 
+          ? (t.type === 'income' ? 'ລາຍຮັບ' : 'ລາຍຈ່າຍ')
+          : (t.type === 'income' ? 'Income' : 'Expense'),
+        t.category?.name || (fontLoaded ? 'ບໍ່ລະບຸ' : 'N/A'),
         formatNumber(t.amount),
-        getAccountName(t.account)
+        getAccountName(t.account, fontLoaded)
       ];
 
       rowData.forEach((data, i) => {
-        if (i === 3) doc.fillColor(t.type === 'income' ? '#22c55e' : '#ef4444');
-        doc.text(data, xPos + 5, rowY, { width: colWidths[i] - 10 });
-        if (i === 3) doc.fillColor('#000000');
+        if (i === 3) {
+          doc.fillColor(t.type === 'income' ? '#22c55e' : '#ef4444');
+        }
+        doc.text(String(data), xPos + 5, rowY, { width: colWidths[i] - 10 });
+        if (i === 3) {
+          doc.fillColor('#000000');
+        }
         xPos += colWidths[i];
       });
 
@@ -225,7 +261,7 @@ const exportPDF = async (req, res) => {
 
     // Footer
     doc.fontSize(8).text(
-      'ສ້າງໂດຍ: ລະບົບບັນທຶກລາຍຮັບ-ລາຍຈ່າຍ',
+      fontLoaded ? 'ສ້າງໂດຍ: ລະບົບບັນທຶກລາຍຮັບ-ລາຍຈ່າຍ' : 'Generated by: Expense Tracker System',
       50,
       doc.page.height - 50,
       { align: 'center' }
@@ -235,23 +271,32 @@ const exportPDF = async (req, res) => {
 
   } catch (error) {
     console.error('Export PDF Error:', error);
-    res.status(500).json({ message: 'ເກີດຂໍ້ຜິດພາດໃນການສົ່ງອອກ PDF' });
+    res.status(500).json({ 
+      message: 'ເກີດຂໍ້ຜິດພາດໃນການສົ່ງອອກ PDF',
+      error: error.message 
+    });
   }
 };
 
 
 // Helper functions
-const getAccountName = (account) => {
-  const accounts = {
+const getAccountName = (account, useLao = true) => {
+  const accountsLao = {
     cash: 'ເງິນສົດ',
     bank: 'ທະນາຄານ',
     ewallet: 'E-Wallet'
   };
+  const accountsEn = {
+    cash: 'Cash',
+    bank: 'Bank',
+    ewallet: 'E-Wallet'
+  };
+  const accounts = useLao ? accountsLao : accountsEn;
   return accounts[account] || account;
 };
 
 const formatNumber = (num) => {
-  return new Intl.NumberFormat('lo-LA').format(num);
+  return new Intl.NumberFormat('en-US').format(num);
 };
 
 module.exports = {
