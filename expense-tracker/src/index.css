@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-/* ✅ ລຶບ @tailwind base/components/utilities ອອກ ເພາະໃຊ້ @import ຂ້າງເທິງແລ້ວ */
-
 @layer base {
   html {
     font-family: 'Noto Sans Lao', 'Space Grotesk', sans-serif;
@@ -13,6 +11,9 @@
 }
 
 @layer components {
+  /* ===================================
+     Buttons
+     =================================== */
   .btn-primary {
     @apply bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-3 rounded-xl font-medium
            hover:from-emerald-600 hover:to-green-700 transform hover:scale-[1.02] transition-all duration-200
@@ -29,42 +30,53 @@
            hover:from-red-600 hover:to-rose-700 transform hover:scale-[1.02] transition-all duration-200
            shadow-lg shadow-red-500/25;
   }
-  
+
+  /* ===================================
+     Cards
+     =================================== */
   .card {
     @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-slate-900/5 border border-white/50;
   }
   
-  /* ✅ ແກ້ໄຂແລ້ວ: ນຳ utilities ຈາກ .card ມາຂຽນໃສ່ໂດຍກົງ ແທນທີ່ຈະ @apply card */
   .card-hover {
-    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-slate-900/5 border border-white/50 hover:shadow-2xl hover:shadow-slate-900/10 hover:scale-[1.01] transition-all duration-300;
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-slate-900/5 border border-white/50 
+           hover:shadow-2xl hover:shadow-slate-900/10 hover:scale-[1.01] transition-all duration-300;
   }
-  
+
+  /* ===================================
+     Form Inputs
+     =================================== */
   .input-field {
     @apply w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 backdrop-blur-sm
            focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200
            placeholder:text-slate-400;
   }
-  
-  /* ✅ ແກ້ໄຂແລ້ວ: ນຳ utilities ຈາກ .card ມາຂຽນໃສ່ໂດຍກົງ ແທນທີ່ຈະ @apply card */
+
+  /* ===================================
+     Stat Cards
+     =================================== */
   .stat-card {
-    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-slate-900/5 border border-white/50 p-6 relative overflow-hidden;
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-slate-900/5 border border-white/50 
+           p-4 md:p-6 relative overflow-hidden;
   }
   
   .stat-card::before {
     content: '';
-    @apply absolute top-0 right-0 w-32 h-32 rounded-full opacity-10 transform translate-x-8 -translate-y-8;
+    @apply absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 rounded-full opacity-10 
+           transform translate-x-8 -translate-y-8;
   }
   
-  .income-card::before {
-    @apply bg-emerald-500;
-  }
-  
-  .expense-card::before {
-    @apply bg-red-500;
-  }
-  
-  .balance-card::before {
-    @apply bg-blue-500;
+  .income-card::before { @apply bg-emerald-500; }
+  .expense-card::before { @apply bg-red-500; }
+  .balance-card::before { @apply bg-blue-500; }
+
+  /* ===================================
+     Sidebar Navigation (Desktop Only)
+     =================================== */
+  .sidebar {
+    @apply fixed left-0 top-0 h-screen w-64 bg-white/80 backdrop-blur-xl 
+           border-r border-slate-200/50 p-6 flex-col z-50
+           hidden md:flex;
   }
   
   .nav-link {
@@ -75,27 +87,276 @@
   .nav-link.active {
     @apply bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25;
   }
-  
+
+  /* ===================================
+     Bottom Navigation (Mobile Only)
+     =================================== */
+  .btm-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl
+           border-t border-slate-200/80 flex items-center justify-around px-2 z-50
+           md:hidden;
+    height: calc(70px + env(safe-area-inset-bottom, 0));
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .btm-nav-item {
+    @apply flex flex-col items-center justify-center py-2 px-3 rounded-xl
+           text-slate-400 no-underline transition-all duration-200;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btm-nav-item.active {
+    @apply text-emerald-600;
+  }
+
+  .btm-nav-item.active .btm-nav-label {
+    @apply font-semibold;
+  }
+
+  .btm-nav-label {
+    @apply text-[11px] mt-1 font-medium;
+  }
+
+  .btm-nav-main {
+    @apply relative;
+  }
+
+  .btm-nav-main-btn {
+    @apply w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full
+           flex items-center justify-center shadow-lg shadow-emerald-500/40 -mt-5
+           transition-transform duration-200 active:scale-95;
+  }
+
+  /* ===================================
+     Main Content Area - Responsive
+     =================================== */
+  .main-content {
+    @apply min-h-screen;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0));
+  }
+
+  @media (min-width: 768px) {
+    .main-content {
+      @apply ml-64 pb-8;
+    }
+  }
+
+  /* ===================================
+     Page Header - Responsive
+     =================================== */
+  .page-header {
+    @apply bg-gradient-to-r from-emerald-500 to-green-600 text-white p-4 md:p-8;
+    padding-top: calc(1rem + env(safe-area-inset-top, 0));
+    border-radius: 0 0 1.5rem 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .page-header {
+      @apply pt-8 rounded-none;
+    }
+  }
+
+  .page-header h1 {
+    @apply text-xl md:text-2xl font-bold;
+  }
+
+  .page-header p {
+    @apply text-sm md:text-base opacity-90 mt-1;
+  }
+
+  /* ===================================
+     Stats Grid - Responsive
+     =================================== */
+  .stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 p-4 md:p-8
+           -mt-8 md:mt-0 relative z-10;
+  }
+
+  .stats-grid > *:last-child {
+    @apply col-span-2 md:col-span-1;
+  }
+
+  /* ===================================
+     Badges
+     =================================== */
   .badge {
     @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
   }
   
-  /* ✅ ແກ້ໄຂແລ້ວ: ນຳ Utilities ຈາກ .badge ມາຂຽນໃສ່ໂດຍກົງ ແທນທີ່ຈະ @apply badge */
   .badge-income {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+           bg-emerald-100 text-emerald-700;
   }
   
-  /* ✅ ແກ້ໄຂແລ້ວ: ນຳ Utilities ຈາກ .badge ມາຂຽນໃສ່ໂດຍກົງ ແທນທີ່ຈະ @apply badge */
   .badge-expense {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+           bg-red-100 text-red-700;
   }
-  
+
+  /* ===================================
+     Transaction List - Responsive
+     =================================== */
+  .transaction-list {
+    @apply px-4 md:px-8;
+  }
+
+  .transaction-item {
+    @apply flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-white rounded-xl md:rounded-2xl
+           mb-2 md:mb-3 shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .transaction-icon {
+    @apply w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center
+           text-lg md:text-xl bg-slate-100;
+  }
+
+  .transaction-info {
+    @apply flex-1 min-w-0;
+  }
+
+  .transaction-name {
+    @apply text-sm md:text-base font-semibold text-slate-800 truncate;
+  }
+
+  .transaction-category {
+    @apply text-xs md:text-sm text-slate-500 mt-0.5;
+  }
+
+  .transaction-amount {
+    @apply text-sm md:text-base font-bold text-right;
+  }
+
+  .transaction-amount.income { @apply text-emerald-600; }
+  .transaction-amount.expense { @apply text-red-500; }
+
+  /* ===================================
+     Section Title
+     =================================== */
+  .section-title {
+    @apply flex items-center justify-between px-4 md:px-8 py-3 md:py-4;
+  }
+
+  .section-title h2 {
+    @apply text-base md:text-lg font-semibold text-slate-800;
+  }
+
+  .section-title a {
+    @apply text-sm text-emerald-600 no-underline font-medium hover:text-emerald-700;
+  }
+
+  /* ===================================
+     Filter Pills
+     =================================== */
+  .filter-pills {
+    @apply flex gap-2 px-4 md:px-8 py-2 overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .filter-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-pill {
+    @apply px-4 py-2 text-sm font-medium rounded-xl border border-slate-200
+           bg-white text-slate-600 whitespace-nowrap cursor-pointer
+           transition-all duration-200 hover:border-slate-300;
+  }
+
+  .filter-pill.active {
+    @apply bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/25;
+  }
+
+  /* ===================================
+     Modal - Responsive
+     =================================== */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-[2000] p-0 md:p-4;
+  }
+
+  .modal-content {
+    @apply bg-white w-full md:w-auto md:min-w-[400px] md:max-w-lg 
+           max-h-[90vh] md:max-h-[85vh] rounded-t-3xl md:rounded-2xl
+           p-5 md:p-6 overflow-y-auto;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0));
+    animation: slideUp 0.3s ease;
+  }
+
+  @media (min-width: 768px) {
+    .modal-content {
+      animation: fadeIn 0.2s ease;
+    }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-header {
+    @apply flex items-center justify-between mb-5;
+  }
+
+  .modal-title {
+    @apply text-lg font-bold text-slate-800;
+  }
+
+  .modal-close {
+    @apply w-8 h-8 rounded-full bg-slate-100 border-none flex items-center justify-center
+           cursor-pointer hover:bg-slate-200 transition-colors;
+  }
+
+  /* ===================================
+     Charts - Responsive
+     =================================== */
+  .charts-grid {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 px-4 md:px-8;
+  }
+
+  /* ===================================
+     Table (Desktop)
+     =================================== */
   .table-row {
     @apply hover:bg-slate-50/50 transition-colors duration-150;
   }
-  
+
+  /* ===================================
+     Glass Effect
+     =================================== */
   .glass {
     @apply bg-white/70 backdrop-blur-xl border border-white/20;
+  }
+
+  /* ===================================
+     Empty State
+     =================================== */
+  .empty-state {
+    @apply text-center py-10 px-5;
+  }
+
+  .empty-state-icon {
+    @apply w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center;
+  }
+
+  .empty-state-title {
+    @apply text-base font-semibold text-slate-800 mb-2;
+  }
+
+  .empty-state-text {
+    @apply text-sm text-slate-500;
+  }
+
+  /* ===================================
+     Loading
+     =================================== */
+  .loading-spinner {
+    @apply w-8 h-8 border-[3px] border-slate-200 border-t-emerald-500 rounded-full
+           animate-spin mx-auto my-10;
   }
 }
 
@@ -111,6 +372,15 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Safe Area Utilities */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0);
   }
 }
 

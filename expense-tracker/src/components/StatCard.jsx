@@ -1,67 +1,52 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
-import { formatCurrency } from '../utils/format';
 
-const StatCard = ({ type, amount, count, currency = 'LAK' }) => {
-  const configs = {
+const StatCard = ({ type, amount, count }) => {
+  const config = {
     income: {
-      title: 'ລາຍຮັບທັງໝົດ',
       icon: TrendingUp,
-      gradient: 'from-emerald-500 to-green-600',
-      bgGradient: 'from-emerald-50 to-green-50',
+      label: 'ລາຍຮັບ',
+      cardClass: 'income-card',
+      amountClass: 'text-emerald-600',
       iconBg: 'bg-emerald-100',
-      iconColor: 'text-emerald-600',
-      textColor: 'text-emerald-600'
+      iconColor: 'text-emerald-600'
     },
     expense: {
-      title: 'ລາຍຈ່າຍທັງໝົດ',
       icon: TrendingDown,
-      gradient: 'from-red-500 to-rose-600',
-      bgGradient: 'from-red-50 to-rose-50',
+      label: 'ລາຍຈ່າຍ',
+      cardClass: 'expense-card',
+      amountClass: 'text-red-500',
       iconBg: 'bg-red-100',
-      iconColor: 'text-red-600',
-      textColor: 'text-red-600'
+      iconColor: 'text-red-500'
     },
     balance: {
-      title: 'ຍອດຄົງເຫຼືອ',
       icon: Wallet,
-      gradient: 'from-blue-500 to-indigo-600',
-      bgGradient: 'from-blue-50 to-indigo-50',
+      label: 'ຍອດເງິນຄົງເຫຼືອ',
+      cardClass: 'balance-card',
+      amountClass: 'text-blue-600',
       iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600',
-      textColor: 'text-blue-600'
+      iconColor: 'text-blue-600'
     }
   };
 
-  const config = configs[type];
-  const Icon = config.icon;
+  const { icon: Icon, label, cardClass, amountClass, iconBg, iconColor } = config[type];
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('lo-LA').format(value || 0) + ' ₭';
+  };
 
   return (
-    <div className={`card p-6 bg-gradient-to-br ${config.bgGradient} relative overflow-hidden group hover:shadow-xl transition-all duration-300`}>
-      {/* Background decoration */}
-      <div className={`absolute -top-8 -right-8 w-32 h-32 rounded-full bg-gradient-to-br ${config.gradient} opacity-10 group-hover:scale-110 transition-transform duration-500`} />
-      
-      <div className="relative">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-xl ${config.iconBg}`}>
-            <Icon className={`w-6 h-6 ${config.iconColor}`} />
-          </div>
-          {count !== undefined && (
-            <span className="text-sm text-slate-500 bg-white/50 px-3 py-1 rounded-full">
-              {count} ລາຍການ
-            </span>
-          )}
-        </div>
-
-        {/* Content */}
-        <div>
-          <p className="text-sm text-slate-600 mb-1">{config.title}</p>
-          <p className={`text-2xl font-bold ${config.textColor} currency`}>
-            {formatCurrency(amount, currency)}
-          </p>
-        </div>
+    <div className={`stat-card ${cardClass}`}>
+      <div className={`w-10 h-10 md:w-12 md:h-12 ${iconBg} rounded-xl flex items-center justify-center mb-3`}>
+        <Icon className={`w-5 h-5 md:w-6 md:h-6 ${iconColor}`} />
       </div>
+      <p className="text-xs md:text-sm text-slate-500 mb-1">{label}</p>
+      <p className={`text-lg md:text-2xl font-bold ${amountClass} currency`}>
+        {formatCurrency(amount)}
+      </p>
+      {count !== undefined && (
+        <p className="text-xs text-slate-400 mt-1">{count} ລາຍການ</p>
+      )}
     </div>
   );
 };

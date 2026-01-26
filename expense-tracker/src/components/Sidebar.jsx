@@ -22,7 +22,8 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200/50 p-6 flex flex-col z-50">
+    // sidebar class ມີ hidden md:flex ເຊິ່ງຈະເຊື່ອງໃນ mobile
+    <aside className="sidebar">
       {/* Logo */}
       <div className="mb-8">
         <div className="flex items-center gap-3">
