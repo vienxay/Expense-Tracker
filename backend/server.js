@@ -15,8 +15,12 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ແກ້ໄຂບ່ອນ Middleware
+app.use(cors({
+  origin: ['https://expense-tracker-eq5e.vercel.app', 'http://localhost:5173'], // ອະນຸຍາດ Vercel ແລະ Local ທົດສອບ
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 app.use(express.json());
 
 // ແລ່ນທຸກວັນ ເວລາ 00:01
