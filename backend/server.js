@@ -17,7 +17,7 @@ const app = express();
 
 // ແກ້ໄຂບ່ອນ Middleware
 app.use(cors({
-  origin: ['https://expense-tracker-eq5e.vercel.app', 'http://localhost:5000'], // ອະນຸຍາດ Vercel ແລະ Local ທົດສອບ
+  origin: ['https://expense-tracker-eq5e.vercel.app'], // ອະນຸຍາດ Vercel ແລະ Local ທົດສອບ
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
