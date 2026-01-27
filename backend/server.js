@@ -17,7 +17,7 @@ const app = express();
 
 // ແກ້ໄຂບ່ອນ Middleware
 app.use(cors({
-  origin: ['https://expense-tracker-eq5e.vercel.app', 'http://localhost:5173'], // ອະນຸຍາດ Vercel ແລະ Local ທົດສອບ
+  origin: ['https://expense-tracker-eq5e.vercel.app', 'http://localhost:5000'], // ອະນຸຍາດ Vercel ແລະ Local ທົດສອບ
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -74,6 +74,6 @@ app.listen(PORT, () => {
   console.log(`
   🚀 ເຊີບເວີເຊື່ອມຕໍ່ສຳເລັດ
   📍 Port: ${PORT}
-  🌍 Environment: ${process.env.NODE_ENV || 'development'}
+  🌍 Environment: ${process.env.NODE_ENV || 'production'}
   `);
 });
