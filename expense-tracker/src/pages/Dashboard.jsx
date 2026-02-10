@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../utils/appHooks';
 import Header from '../components/Header';
 import StatCard from '../components/StatCard';
 import TransactionList from '../components/TransactionList';

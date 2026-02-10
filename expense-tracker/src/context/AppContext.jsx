@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useCallback } from 'react';
+import { createContext, useReducer, useCallback } from 'react';
 import { transactionAPI, categoryAPI, budgetAPI } from '../utils/api';
 import toast from 'react-hot-toast';
 
@@ -222,14 +222,6 @@ export function AppProvider({ children }) {
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
-}
-
-export function useApp() {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used within AppProvider');
-  }
-  return context;
 }
 
 export default AppContext;

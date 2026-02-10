@@ -2,6 +2,44 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { formatCurrency } from '../utils/format';
 
+const CustomTooltip = ({ active, payload, currency, total }) => {
+  if (active && payload && payload.length) {
+    const item = payload[0].payload;
+    return (
+      <div className="bg-white p-3 rounded-xl shadow-lg border border-slate-200">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-xl">{item.icon}</span>
+          <span className="font-medium text-slate-700">{item.name}</span>
+        </div>
+        <p className="text-lg font-semibold text-slate-800">
+          {formatCurrency(item.total, currency)}
+        </p>
+        <p className="text-sm text-slate-500">
+          {((item.total / total) * 100).toFixed(1)}%
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomLegend = ({ payload }) => {
+  return (
+    <div className="flex flex-wrap justify-center gap-3 mt-4">
+      {payload.map((entry, index) => (
+        <div key={index} className="flex items-center gap-2">
+          <div 
+            className="w-3 h-3 rounded-full" 
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-sm text-slate-600">{entry.payload.icon}</span>
+          <span className="text-sm text-slate-600">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const CategoryChart = ({ data, currency = 'LAK' }) => {
   if (!data || data.length === 0) {
     return (
@@ -12,44 +50,6 @@ const CategoryChart = ({ data, currency = 'LAK' }) => {
   }
 
   const total = data.reduce((sum, item) => sum + item.total, 0);
-
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const item = payload[0].payload;
-      return (
-        <div className="bg-white p-3 rounded-xl shadow-lg border border-slate-200">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xl">{item.icon}</span>
-            <span className="font-medium text-slate-700">{item.name}</span>
-          </div>
-          <p className="text-lg font-semibold text-slate-800">
-            {formatCurrency(item.total, currency)}
-          </p>
-          <p className="text-sm text-slate-500">
-            {((item.total / total) * 100).toFixed(1)}%
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const CustomLegend = ({ payload }) => {
-    return (
-      <div className="flex flex-wrap justify-center gap-3 mt-4">
-        {payload.map((entry, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-sm text-slate-600">{entry.payload.icon}</span>
-            <span className="text-sm text-slate-600">{entry.value}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="h-80">
@@ -76,7 +76,7 @@ const CategoryChart = ({ data, currency = 'LAK' }) => {
               />
             ))}
           </Pie>
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip currency={currency} total={total} />} />
           <Legend content={<CustomLegend />} />
         </PieChart>
       </ResponsiveContainer>

@@ -9,7 +9,6 @@ import {
   Settings,
   List
 } from 'lucide-react';
-import Logo from './Logo';
 
 const Sidebar = () => {
   const navItems = [
@@ -27,10 +26,6 @@ const Sidebar = () => {
     <aside className="sidebar">
       {/* Logo */}
       <div className="mb-8">
-        <Logo size={40} showText={true} />
-      </div>
-      
-      {/* <div className="mb-8">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
             <Wallet className="w-5 h-5 text-white" />
@@ -40,8 +35,8 @@ const Sidebar = () => {
             <p className="text-xs text-slate-500">Expense Tracker</p>
           </div>
         </div>
-      </div> */}
-
+      </div>
+      
       {/* Navigation */}
       <nav className="flex-1 space-y-2">
         {navItems.map((item) => (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../utils/appHooks';
 import Header from '../components/Header';
 import { formatCurrency, formatDateLao } from '../utils/format';
 import { 

@@ -6,7 +6,6 @@ const connectDB = require('./config/db');
 
 const { processRecurringTransactions } = require('./controllers/recurringController');
 
-
 // Load env vars
 dotenv.config();
 
@@ -15,12 +14,32 @@ connectDB();
 
 const app = express();
 
-// ແກ້ໄຂບ່ອນ Middleware
+// ✅ ແກ້ໄຂ CORS - ລຶບ space ແລະ ເພີ່ມ localhost
+const allowedOrigins = [
+  'https://expense-tracker-eq5e.vercel.app',  // Production (ບໍ່ມີ space)
+  'http://localhost:3000',                     // React default
+  'http://localhost:5173',                     // Vite default
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173'
+];
+
 app.use(cors({
-  origin: ['https://expense-tracker-eq5e.vercel.app'], // ອະນຸຍາດ Vercel ແລະ Local ທົດສອບ
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  origin: function(origin, callback) {
+    // ອະນຸຍາດ requests ທີ່ບໍ່ມີ origin (ເຊັ່ນ: mobile apps, Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 
 // ແລ່ນທຸກວັນ ເວລາ 00:01
@@ -33,7 +52,6 @@ cron.schedule('1 0 * * *', async () => {
   }
 });
 
-
 // Routes
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
@@ -45,7 +63,7 @@ app.use('/api/recurring', require('./routes/recurringRoutes'));
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
-    message: 'ລະບົບບັນທຶກລາຍຮັບ-ລາຍຈ່າຍ API ເຮັດວຽກປົກກະຕິ',
+    message: 'ລະບົກບັນທຶກລາຍຮັບ-ລາຍຈ່າຍ API ເຮັດວຽກປົກກະຕິ',
     timestamp: new Date().toISOString()
   });
 });
@@ -75,5 +93,6 @@ app.listen(PORT, () => {
   🚀 ເຊີບເວີເຊື່ອມຕໍ່ສຳເລັດ
   📍 Port: ${PORT}
   🌍 Environment: ${process.env.NODE_ENV || 'production'}
+  🌐 Allowed Origins: ${allowedOrigins.join(', ')}
   `);
 });

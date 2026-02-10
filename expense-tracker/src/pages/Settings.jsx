@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp } from '../utils/appHooks';
 import Header from '../components/Header';
 import { categoryAPI } from '../utils/api';
 import { Plus, Edit2, Trash2, Database, RefreshCw } from 'lucide-react';

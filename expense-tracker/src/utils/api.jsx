@@ -1,18 +1,28 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://expense-tracker-production-9426.up.railway.app/api';
+// ✅ ໃຊ້ window.location ເພື່ອກວດວ່າເປັນ localhost ຫຼືບໍ່
+const isLocalhost = window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1';
+
+const API_BASE_URL = isLocalhost 
+  ? '/api'  // Local: ໃຊ້ proxy → localhost:5000
+  : 'https://expense-tracker-production-9426.up.railway.app/api'; // Production: Railway
+
+console.log('🌍 Environment:', isLocalhost ? 'Local' : 'Production');
+console.log('🔗 API URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 });
 
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // ສາມາດເພີ່ມ token ໄດ້ທີ່ນີ້
+    console.log('🚀 API Request:', config.method.toUpperCase(), config.url);
     return config;
   },
   (error) => {
@@ -24,6 +34,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
+    console.error('❌ API Error:', error.response?.status, error.message);
     const message = error.response?.data?.message || 'ເກີດຂໍ້ຜິດພາດ';
     return Promise.reject({ message, ...error.response?.data });
   }
