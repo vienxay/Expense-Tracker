@@ -115,7 +115,7 @@ export function AppProvider({ children }) {
 
   const createTransaction = useCallback(async (data) => {
     try {
-      const response = await transactionAPI.create(data);
+      const response = await transactionAPI.create(data);  // ✅ ໃຊ້ transactionAPI
       dispatch({ type: 'ADD_TRANSACTION', payload: response.data });
       toast.success('ບັນທຶກທຸລະກຳສຳເລັດ');
       return response.data;
@@ -220,6 +220,8 @@ export function AppProvider({ children }) {
     setFilters,
     dispatch
   };
+
+  
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

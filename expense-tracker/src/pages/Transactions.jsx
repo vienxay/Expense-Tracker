@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useApp } from '../utils/appHooks';
 import Header from '../components/Header';
 import TransactionList from '../components/TransactionList';
-import { Filter, Calendar, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 const Transactions = () => {
@@ -22,8 +22,6 @@ const Transactions = () => {
     endDate: format(endOfMonth(new Date()), 'yyyy-MM-dd'),
     search: ''
   });
-  
-  // const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -77,7 +75,7 @@ const Transactions = () => {
               />
             </div>
 
-            {/* Type Filter */}
+            {/* Type Filter - ມີທຸກປະເພດ */}
             <select
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
